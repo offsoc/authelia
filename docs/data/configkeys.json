@@ -300,6 +300,26 @@
         "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PERMIT_UNAUTHENTICATED_BIND"
     },
     {
+        "path": "authentication_backend.ldap.pooling.count",
+        "secret": false,
+        "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_POOLING_COUNT"
+    },
+    {
+        "path": "authentication_backend.ldap.pooling.enable",
+        "secret": false,
+        "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_POOLING_ENABLE"
+    },
+    {
+        "path": "authentication_backend.ldap.pooling.retries",
+        "secret": false,
+        "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_POOLING_RETRIES"
+    },
+    {
+        "path": "authentication_backend.ldap.pooling.timeout",
+        "secret": false,
+        "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_POOLING_TIMEOUT"
+    },
+    {
         "path": "authentication_backend.ldap.start_tls",
         "secret": false,
         "env": "AUTHELIA_AUTHENTICATION_BACKEND_LDAP_START_TLS"
