@@ -227,7 +227,7 @@ func TestWebAuthnRegistrationPUT(t *testing.T) {
 					mock.StorageMock.
 						EXPECT().
 						LoadWebAuthnCredentialsByUsername(mock.Ctx, exampleDotCom, testUsername).
-						Return([]model.WebAuthnCredential{{Description: "test"}}, nil),
+						Return([]model.WebAuthnCredential{{Description: testValue}}, nil),
 				)
 			},
 			regexp.MustCompile(`^\{"status":"KO","message":"Another one of your security keys is already registered with that display name."}$`),
@@ -391,7 +391,7 @@ func TestWebAuthnRegistrationPOST(t *testing.T) {
 				us.Username = testUsername
 				us.AuthenticationMethodRefs.UsernameAndPassword = true
 				us.WebAuthn = &session.WebAuthn{
-					Description: "test",
+					Description: testValue,
 					SessionData: &webauthn.SessionData{
 						Challenge:        "aq_AXdvsDMsKW_1aY31XQhU17ZMg1i0TK013DwukB2U",
 						UserID:           decode("OiRQc3wmemUzdHlkVjhVSk5Pe35YMCRCOklLYzVzIkMpaEglNkF5dnVKRSlTPCJbRDZDP102WXpiYXdNekRiTA=="),
@@ -447,7 +447,7 @@ func TestWebAuthnRegistrationPOST(t *testing.T) {
 				us.Username = testUsername
 				us.AuthenticationMethodRefs.UsernameAndPassword = true
 				us.WebAuthn = &session.WebAuthn{
-					Description: "test",
+					Description: testValue,
 					SessionData: &webauthn.SessionData{
 						Challenge:        "aq_AXdvsDMsKW_1aY31XQhU17ZMg1i0TK013DwukB2U",
 						UserID:           decode("OiRQc3wmemUzdHlkVjhVSk5Pe35YMCRCOklLYzVzIkMpaEglNkF5dnVKRSlTPCJbRDZDP102WXpiYXdNekRiTA=="),

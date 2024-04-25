@@ -21,6 +21,7 @@ var (
 )
 
 const (
+	testValue           = "test"
 	testXOriginalMethod = "X-Original-Method"
 	testXOriginalUrl    = "X-Original-URL"
 	testBypass          = "bypass"

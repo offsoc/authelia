@@ -49,7 +49,7 @@ func SecondFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middl
 
 		userPasswordOk, err := ctx.Providers.UserProvider.CheckUserPassword(userSession.Username, bodyJSON.Password)
 		if err != nil {
-			_ = markAuthenticationAttempt(ctx, false, nil, userSession.Username, regulation.AuthTypePassword, err)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthTypePassword, err)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
@@ -57,18 +57,14 @@ func SecondFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middl
 		}
 
 		if !userPasswordOk {
-			_ = markAuthenticationAttempt(ctx, false, nil, userSession.Username, regulation.AuthTypePassword, nil)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthTypePassword, nil)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
 			return
 		}
 
-		if err = markAuthenticationAttempt(ctx, true, nil, userSession.Username, regulation.AuthTypePassword, nil); err != nil {
-			respondUnauthorized(ctx, messageAuthenticationFailed)
-
-			return
-		}
+		doMarkAuthenticationAttempt(ctx, true, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthTypePassword, nil)
 
 		userSession.SetTwoFactorPassword(ctx.Clock.Now())
 

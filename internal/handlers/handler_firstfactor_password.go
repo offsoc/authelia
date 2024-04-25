@@ -31,9 +31,9 @@ func FirstFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middle
 			return
 		}
 
-		if bannedUntil, err := ctx.Providers.Regulator.Regulate(ctx, bodyJSON.Username); err != nil {
+		if ban, value, expires, err := ctx.Providers.Regulator.BanCheck(ctx, bodyJSON.Username); err != nil {
 			if errors.Is(err, regulation.ErrUserIsBanned) {
-				_ = markAuthenticationAttempt(ctx, false, &bannedUntil, bodyJSON.Username, regulation.AuthType1FA, nil)
+				doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(ban, value, expires), regulation.AuthType1FA, nil)
 
 				respondUnauthorized(ctx, messageAuthenticationFailed)
 
@@ -49,7 +49,7 @@ func FirstFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middle
 
 		userPasswordOk, err := ctx.Providers.UserProvider.CheckUserPassword(bodyJSON.Username, bodyJSON.Password)
 		if err != nil {
-			_ = markAuthenticationAttempt(ctx, false, nil, bodyJSON.Username, regulation.AuthType1FA, err)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, bodyJSON.Username, nil), regulation.AuthType1FA, err)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
@@ -57,18 +57,14 @@ func FirstFactorPasswordPOST(delayFunc middlewares.TimingAttackDelayFunc) middle
 		}
 
 		if !userPasswordOk {
-			_ = markAuthenticationAttempt(ctx, false, nil, bodyJSON.Username, regulation.AuthType1FA, nil)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, bodyJSON.Username, nil), regulation.AuthType1FA, nil)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
 			return
 		}
 
-		if err = markAuthenticationAttempt(ctx, true, nil, bodyJSON.Username, regulation.AuthType1FA, nil); err != nil {
-			respondUnauthorized(ctx, messageAuthenticationFailed)
-
-			return
-		}
+		doMarkAuthenticationAttempt(ctx, true, regulation.NewBan(regulation.BanTypeNone, bodyJSON.Username, nil), regulation.AuthType1FA, nil)
 
 		provider, err := ctx.GetSessionProvider()
 		if err != nil {
@@ -198,9 +194,9 @@ func FirstFactorReauthenticatePOST(delayFunc middlewares.TimingAttackDelayFunc) 
 			return
 		}
 
-		if bannedUntil, err := ctx.Providers.Regulator.Regulate(ctx, userSession.Username); err != nil {
+		if ban, value, expires, err := ctx.Providers.Regulator.BanCheck(ctx, userSession.Username); err != nil {
 			if errors.Is(err, regulation.ErrUserIsBanned) {
-				_ = markAuthenticationAttempt(ctx, false, &bannedUntil, userSession.Username, regulation.AuthType1FA, nil)
+				doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(ban, value, expires), regulation.AuthType1FA, nil)
 
 				respondUnauthorized(ctx, messageAuthenticationFailed)
 
@@ -216,7 +212,7 @@ func FirstFactorReauthenticatePOST(delayFunc middlewares.TimingAttackDelayFunc) 
 
 		userPasswordOk, err := ctx.Providers.UserProvider.CheckUserPassword(userSession.Username, bodyJSON.Password)
 		if err != nil {
-			_ = markAuthenticationAttempt(ctx, false, nil, userSession.Username, regulation.AuthType1FA, err)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthType1FA, err)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
@@ -224,18 +220,14 @@ func FirstFactorReauthenticatePOST(delayFunc middlewares.TimingAttackDelayFunc) 
 		}
 
 		if !userPasswordOk {
-			_ = markAuthenticationAttempt(ctx, false, nil, userSession.Username, regulation.AuthType1FA, nil)
+			doMarkAuthenticationAttempt(ctx, false, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthType1FA, nil)
 
 			respondUnauthorized(ctx, messageAuthenticationFailed)
 
 			return
 		}
 
-		if err = markAuthenticationAttempt(ctx, true, nil, userSession.Username, regulation.AuthType1FA, nil); err != nil {
-			respondUnauthorized(ctx, messageAuthenticationFailed)
-
-			return
-		}
+		doMarkAuthenticationAttempt(ctx, true, regulation.NewBan(regulation.BanTypeNone, userSession.Username, nil), regulation.AuthType1FA, nil)
 
 		if err = ctx.RegenerateSession(); err != nil {
 			ctx.Logger.WithError(err).Errorf(logFmtErrSessionRegenerate, regulation.AuthType1FA, userSession.Username)

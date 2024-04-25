@@ -580,7 +580,7 @@ func TestFirstFactorPasskeyPOST(t *testing.T) {
 				)
 			},
 			have:           dataReqGood,
-			expectedStatus: fasthttp.StatusForbidden,
+			expectedStatus: fasthttp.StatusOK,
 			expectedf: func(t *testing.T, mock *mocks.MockAutheliaCtx) {
 				us, err := mock.Ctx.GetSession()
 
@@ -588,7 +588,7 @@ func TestFirstFactorPasskeyPOST(t *testing.T) {
 
 				assert.Nil(t, us.WebAuthn)
 
-				AssertLogEntryMessageAndError(t, mock.Hook.LastEntry(), "Error occurred validating a WebAuthn passkey authentication challenge for user 'john': error occurred recording the authentication attempt", "error marking auth")
+				AssertLogEntryMessageAndError(t, mock.Hook.LastEntry(), "Failed to record Passkey authentication attempt", "error marking auth")
 			},
 		},
 		{

@@ -153,7 +153,7 @@ func (s *HandlerSignPasswordSuite) TestShouldRedirectUserToDefaultURLDelayFunc()
 	})
 }
 
-func (s *HandlerSignPasswordSuite) TestShouldErrorMarkAttempt() {
+func (s *HandlerSignPasswordSuite) TestShouldHandleErrorMarkAttempt() {
 	gomock.InOrder(
 		s.mock.UserProviderMock.
 			EXPECT().
@@ -182,8 +182,10 @@ func (s *HandlerSignPasswordSuite) TestShouldErrorMarkAttempt() {
 
 	SecondFactorPasswordPOST(nil)(s.mock.Ctx)
 
-	s.mock.Assert401KO(s.T(), "Authentication failed. Check your credentials.")
-	s.AssertLastLogMessage("Unable to mark Password authentication attempt by user 'john'", "bad socket")
+	s.mock.Assert200OK(s.T(), redirectResponse{
+		Redirect: testRedirectionURLString,
+	})
+	s.AssertLastLogMessage("Failed to record Password authentication attempt", "bad socket")
 }
 
 func (s *HandlerSignPasswordSuite) TestShouldHandleBadPassword() {
@@ -249,7 +251,7 @@ func (s *HandlerSignPasswordSuite) TestShouldHandleBadPasswordMarkAttemptError()
 	SecondFactorPasswordPOST(nil)(s.mock.Ctx)
 
 	s.mock.Assert401KO(s.T(), "Authentication failed. Check your credentials.")
-	s.AssertLastLogMessage("Unable to mark Password authentication attempt by user 'john'", "bad sockets")
+	s.AssertLastLogMessage("Unsuccessful Password authentication attempt by user 'john'", "")
 }
 
 func (s *HandlerSignPasswordSuite) TestShouldHandleBadPasswordWithError() {
