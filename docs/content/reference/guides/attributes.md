@@ -2,7 +2,7 @@
 title: "Attributes"
 description: "This guide highlights information about attributes available via various methods"
 summary: "This guide highlights information about attributes available via various methods."
-date: 2022-06-20T10:05:55+10:00
+date: 2025-01-04T22:20:20+11:00
 draft: false
 images: []
 weight: 220
