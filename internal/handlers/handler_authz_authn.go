@@ -27,9 +27,10 @@ import (
 )
 
 // NewCookieSessionAuthnStrategy creates a new CookieSessionAuthnStrategy.
-func NewCookieSessionAuthnStrategy(refresh schema.RefreshIntervalDuration) *CookieSessionAuthnStrategy {
+func NewCookieSessionAuthnStrategy(refresh schema.RefreshIntervalDuration, header bool) *CookieSessionAuthnStrategy {
 	return &CookieSessionAuthnStrategy{
 		refresh: refresh,
+		header:  header,
 	}
 }
 
@@ -83,6 +84,7 @@ func NewHeaderLegacyAuthnStrategy() *HeaderLegacyAuthnStrategy {
 
 // CookieSessionAuthnStrategy is a session cookie AuthnStrategy.
 type CookieSessionAuthnStrategy struct {
+	header  bool
 	refresh schema.RefreshIntervalDuration
 }
 
@@ -94,6 +96,12 @@ func (s *CookieSessionAuthnStrategy) Get(ctx *middlewares.AutheliaCtx, provider 
 		Type:     AuthnTypeCookie,
 		Level:    authentication.NotAuthenticated,
 		Username: anonymous,
+	}
+
+	if s.header {
+		if cookies := decodeHeaderCookie(ctx.Request.Header.PeekBytes(headerCookie)); cookies != nil {
+			ctx.Response.Header.SetBytesK(headerCookie, cookies.Encode(provider.Config.Name))
+		}
 	}
 
 	if userSession, err = provider.GetSession(ctx.RequestCtx); err != nil {
@@ -144,6 +152,22 @@ func (s *CookieSessionAuthnStrategy) Get(ctx *middlewares.AutheliaCtx, provider 
 		Level: userSession.AuthenticationLevel(ctx.Configuration.WebAuthn.EnablePasskey2FA),
 		Type:  AuthnTypeCookie,
 	}, nil
+}
+
+type Cookies map[string]string
+
+func (c Cookies) Encode(skip ...string) string {
+	var parts []string
+
+	for key, value := range c {
+		if utils.IsStringInSlice(key, skip) {
+			continue
+		}
+
+		parts = append(parts, fmt.Sprintf("%s=%s", key, value))
+	}
+
+	return strings.Join(parts, ";")
 }
 
 // CanHandleUnauthorized returns true if this AuthnStrategy should handle Unauthorized requests.
