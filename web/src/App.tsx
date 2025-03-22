@@ -49,8 +49,8 @@ function App() {
     const { i18n } = useTranslation();
 
     return (
-        <LanguageContextProvider i18n={i18n}>
-            <ThemeContextProvider>
+        <ThemeContextProvider>
+            <LanguageContextProvider i18n={i18n}>
                 <Suspense fallback={<LoadingPage />}>
                     <CssBaseline />
                     <NotificationsContext.Provider value={{ notification, setNotification }}>
@@ -82,8 +82,8 @@ function App() {
                         </LocalStorageMethodContextProvider>
                     </NotificationsContext.Provider>
                 </Suspense>
-            </ThemeContextProvider>
-        </LanguageContextProvider>
+            </LanguageContextProvider>
+        </ThemeContextProvider>
     );
 }
 
